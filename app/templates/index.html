@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <title>Gestionnaire de tâches</title>
+</head>
+<body>
+  <h1>Gestionnaire de tâches</h1>
+  <ul>
+    {% for task in tasks %}
+      <li>{{ task.title }}</li>
+    {% else %}
+      <li>Aucune tâche pour l'instant.</li>
+    {% endfor %}
+  </ul>
+</body>
+</html>
