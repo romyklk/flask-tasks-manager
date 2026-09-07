@@ -1,9 +1,15 @@
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.orm import DeclarativeBase
 
-db = SQLAlchemy()
+
+class Base(DeclarativeBase):
+    pass
 
 
-class Task(db.Model):
+db = SQLAlchemy(model_class=Base)
+
+
+class Task(db.Model):  # type: ignore[name-defined]
     __tablename__ = "tasks"
 
     id = db.Column(db.Integer, primary_key=True)

@@ -13,14 +13,15 @@ Chaque commande est donnée sous deux formes :
 ```bash
 make install
 ```
-Crée l'environnement virtuel Python (`.venv/`) et installe Flask, pytest, gunicorn, Flask-SQLAlchemy, PyMySQL, cryptography.
+Crée l'environnement virtuel Python (`.venv/`) et installe Flask, pytest, gunicorn, Flask-SQLAlchemy, PyMySQL, cryptography, **ruff** et **mypy** (via `requirements-dev.txt`, qui inclut `requirements.txt`).
 
 **Résultat** : un dossier `.venv/` créé, aucune sortie particulière à part le log de `pip install`.
 
 **Commande brute (CI)** :
 ```bash
-pip install -r requirements.txt
+pip install -r requirements-dev.txt
 ```
+En CI, si le job ne fait que lancer les tests (pas de lint), `pip install -r requirements.txt` suffit — `requirements-dev.txt` n'est utile que pour `ruff`/`mypy`.
 
 ### `make test`
 
@@ -45,6 +46,53 @@ pytest -v
 Pour générer un rapport exploitable par `actions/upload-artifact` en CI (format JUnit) :
 ```bash
 pytest --junitxml=report.xml
+```
+
+### `make lint`
+
+```bash
+make lint
+```
+Analyse le code avec **Ruff** (style, imports non triés, syntaxe obsolète — config dans `pyproject.toml`).
+
+**Résultat** :
+```
+All checks passed!
+```
+Si des problèmes sont trouvés, Ruff les liste avec le fichier/la ligne concernés (code de sortie non nul).
+
+**Commande brute (CI)** :
+```bash
+ruff check .
+```
+
+### `make typecheck`
+
+```bash
+make typecheck
+```
+Vérifie les types avec **mypy** sur `app/` et `wsgi.py` (config dans `pyproject.toml`).
+
+**Résultat** :
+```
+Success: no issues found in 4 source files
+```
+
+**Commande brute (CI)** :
+```bash
+mypy app wsgi.py
+```
+
+### `make quality`
+
+```bash
+make quality
+```
+Enchaîne `make lint` puis `make typecheck` — pratique pour tout vérifier d'un coup avant de pousser.
+
+**Commande brute (CI)** :
+```bash
+ruff check . && mypy app wsgi.py
 ```
 
 ### `make run`
@@ -134,13 +182,13 @@ docker compose down -v
 ```bash
 make clean
 ```
-Supprime `.venv/`, les caches pytest/Python (`.pytest_cache`, `__pycache__`) et `report.xml`.
+Supprime `.venv/`, les caches pytest/Python/Ruff/mypy (`.pytest_cache`, `.ruff_cache`, `.mypy_cache`, `__pycache__`) et `report.xml`.
 
 **Résultat** : dossier du projet remis à l'état "juste après un clone git" (hors Docker).
 
 **Commande brute** :
 ```bash
-rm -rf .venv .pytest_cache **/__pycache__ report.xml
+rm -rf .venv .pytest_cache .ruff_cache .mypy_cache **/__pycache__ report.xml
 ```
 
 ## Utiliser l'API en ligne de commande (`curl`)

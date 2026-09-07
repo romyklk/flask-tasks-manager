@@ -23,6 +23,8 @@ projet-flask/
 │   └── test_app.py          # suite de tests pytest
 ├── wsgi.py                   # point d'entrée pour gunicorn
 ├── requirements.txt
+├── requirements-dev.txt       # + ruff, mypy (pas installés dans l'image Docker)
+├── pyproject.toml             # config ruff + mypy
 ├── Dockerfile
 ├── compose.yml                # service api + service db (MySQL)
 ├── Makefile
@@ -36,16 +38,19 @@ Chaque commande existe sous deux formes : le raccourci `make` (pratique en local
 
 | Action                              | `make`             | Commande brute (CI)                                              |
 | ------------------------------------ | ------------------ | ----------------------------------------------------------------- |
-| Installer les dépendances            | `make install`      | `pip install -r requirements.txt`                                  |
+| Installer les dépendances (+ ruff/mypy) | `make install`  | `pip install -r requirements-dev.txt`                              |
 | Lancer les tests                     | `make test`         | `pytest -v` (ou `pytest --junitxml=report.xml` pour un rapport CI) |
+| Linter le code (Ruff)                 | `make lint`         | `ruff check .`                                                     |
+| Vérifier les types (mypy)             | `make typecheck`    | `mypy app wsgi.py`                                                 |
+| Lint + types en une commande          | `make quality`      | `ruff check . && mypy app wsgi.py`                                 |
 | Lancer le serveur de dev             | `make run`          | `FLASK_APP=wsgi.py flask run --port 5001`                          |
 | Construire l'image Docker            | `make docker-build` | `docker compose build`                                             |
 | Démarrer les conteneurs (api + db)   | `make up`           | `docker compose up -d --build`                                     |
 | Voir les logs                        | `make logs`         | `docker compose logs -f`                                           |
 | Arrêter les conteneurs               | `make down`         | `docker compose down`                                              |
-| Nettoyer (venv, caches, rapports)    | `make clean`        | `rm -rf .venv .pytest_cache **/__pycache__ report.xml`             |
+| Nettoyer (venv, caches, rapports)    | `make clean`        | `rm -rf .venv .pytest_cache .ruff_cache .mypy_cache **/__pycache__ report.xml` |
 
-`make install` et `make run` passent par un environnement virtuel (`.venv/bin/...`) — inutile sur un runner CI, qui installe directement dans son propre environnement isolé, d'où les commandes brutes sans `.venv/bin/`.
+`make install` et `make run` passent par un environnement virtuel (`.venv/bin/...`) — inutile sur un runner CI, qui installe directement dans son propre environnement isolé, d'où les commandes brutes sans `.venv/bin/`. **Ruff** (linter) et **mypy** (vérification de types) sont dans `requirements-dev.txt`, séparé de `requirements.txt` : l'image Docker (`Dockerfile`) n'installe que `requirements.txt`, ces outils de développement n'ont rien à faire dans l'image de production.
 
 ### Base de données MySQL (Docker)
 
