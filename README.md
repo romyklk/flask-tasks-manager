@@ -1,14 +1,14 @@
-# Gestionnaire de tâches — Flask
+# Gestionnaire de tâches, Flask
 
-Petite application de gestion de tâches développée avec **Flask** : une API JSON et une interface web (template HTML) qui utilise cette même API en arrière-plan. Elle expose :
+Petite application de gestion de tâches développée avec **Flask** : une API JSON et une interface web (template HTML), chacune avec ses propres routes mais opérant sur les mêmes données. Elle expose :
 
-- `GET /tasks` — liste toutes les tâches (JSON)
-- `POST /tasks` — ajoute une tâche (`{"title": "..."}`)
-- `PATCH /tasks/<id>` — modifie une tâche (`{"title": "..."}` et/ou `{"done": true}`)
-- `DELETE /tasks/<id>` — supprime une tâche
-- `GET /` — page d'accueil HTML : ajouter/cocher/supprimer une tâche depuis le navigateur (utilise `/web/tasks/...` en interne)
+- `GET /tasks` : liste toutes les tâches (JSON)
+- `POST /tasks` : ajoute une tâche (`{"title": "..."}`)
+- `PATCH /tasks/<id>` : modifie une tâche (`{"title": "..."}` et/ou `{"done": true}`)
+- `DELETE /tasks/<id>` : supprime une tâche
+- `GET /` : page d'accueil HTML, pour ajouter/cocher/supprimer une tâche depuis le navigateur (utilise `/web/tasks/...` en interne)
 
-Les tâches sont stockées dans une base **MySQL** (persistante entre les redémarrages) quand l'app tourne via Docker. En local sans Docker, en l'absence de la variable `DATABASE_URL`, l'app utilise une base **SQLite en mémoire** — pratique pour développer/tester sans dépendre d'un serveur MySQL, mais tout est perdu à l'arrêt.
+Les tâches sont stockées dans une base **MySQL** (persistante entre les redémarrages) quand l'app tourne via Docker. En local sans Docker, en l'absence de la variable `DATABASE_URL`, l'app utilise une base **SQLite en mémoire**, pratique pour développer et tester sans dépendre d'un serveur MySQL, mais tout y est perdu à l'arrêt.
 
 ## Structure du projet
 
@@ -36,21 +36,21 @@ projet-flask/
 
 Chaque commande existe sous deux formes : le raccourci `make` (pratique en local) et la commande brute équivalente (à utiliser telle quelle dans un pipeline CI, ou si `make` n'est pas disponible). Détail complet et résultat attendu de chacune : voir **[COMMANDES.md](COMMANDES.md)**.
 
-| Action                              | `make`             | Commande brute (CI)                                              |
-| ------------------------------------ | ------------------ | ----------------------------------------------------------------- |
-| Installer les dépendances (+ ruff/mypy) | `make install`  | `pip install -r requirements-dev.txt`                              |
-| Lancer les tests                     | `make test`         | `pytest -v` (ou `pytest --junitxml=report.xml` pour un rapport CI) |
-| Linter le code (Ruff)                 | `make lint`         | `ruff check .`                                                     |
-| Vérifier les types (mypy)             | `make typecheck`    | `mypy app wsgi.py`                                                 |
-| Lint + types en une commande          | `make quality`      | `ruff check . && mypy app wsgi.py`                                 |
-| Lancer le serveur de dev             | `make run`          | `FLASK_APP=wsgi.py flask run --port 5001`                          |
-| Construire l'image Docker            | `make docker-build` | `docker compose build`                                             |
-| Démarrer les conteneurs (api + db)   | `make up`           | `docker compose up -d --build`                                     |
-| Voir les logs                        | `make logs`         | `docker compose logs -f`                                           |
-| Arrêter les conteneurs               | `make down`         | `docker compose down`                                              |
-| Nettoyer (venv, caches, rapports)    | `make clean`        | `rm -rf .venv .pytest_cache .ruff_cache .mypy_cache **/__pycache__ report.xml` |
+| Action                                   | `make`               | Commande brute (CI)                                                            |
+| ---------------------------------------- | -------------------- | ------------------------------------------------------------------------------ |
+| Installer les dépendances (+ ruff/mypy)  | `make install`       | `pip install -r requirements-dev.txt`                                          |
+| Lancer les tests                         | `make test`          | `pytest -v` (ou `pytest --junitxml=report.xml` pour un rapport CI)             |
+| Linter le code (Ruff)                    | `make lint`          | `ruff check .`                                                                 |
+| Vérifier les types (mypy)                | `make typecheck`     | `mypy app wsgi.py`                                                             |
+| Lint + types en une commande             | `make quality`       | `ruff check . && mypy app wsgi.py`                                             |
+| Lancer le serveur de dev                 | `make run`           | `FLASK_APP=wsgi.py flask run --port 5001`                                      |
+| Construire l'image Docker                | `make docker-build`  | `docker compose build`                                                         |
+| Démarrer les conteneurs (api + db)       | `make up`            | `docker compose up -d --build`                                                 |
+| Voir les logs                            | `make logs`          | `docker compose logs -f`                                                       |
+| Arrêter les conteneurs                   | `make down`          | `docker compose down`                                                          |
+| Nettoyer (venv, caches, rapports)        | `make clean`         | `rm -rf .venv .pytest_cache .ruff_cache .mypy_cache **/__pycache__ report.xml` |
 
-`make install` et `make run` passent par un environnement virtuel (`.venv/bin/...`) — inutile sur un runner CI, qui installe directement dans son propre environnement isolé, d'où les commandes brutes sans `.venv/bin/`. **Ruff** (linter) et **mypy** (vérification de types) sont dans `requirements-dev.txt`, séparé de `requirements.txt` : l'image Docker (`Dockerfile`) n'installe que `requirements.txt`, ces outils de développement n'ont rien à faire dans l'image de production.
+`make install` et `make run` passent par un environnement virtuel (`.venv/bin/...`), ce qui est inutile sur un runner CI : celui-ci installe directement dans son propre environnement isolé, d'où les commandes brutes sans `.venv/bin/`. **Ruff** (linter) et **mypy** (vérification de types) sont dans `requirements-dev.txt`, séparé de `requirements.txt` : l'image Docker (`Dockerfile`) n'installe que `requirements.txt`, ces outils de développement n'ont rien à faire dans l'image de production.
 
 ### Base de données MySQL (Docker)
 

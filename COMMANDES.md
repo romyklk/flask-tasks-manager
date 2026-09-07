@@ -4,7 +4,7 @@ Liste de toutes les commandes disponibles et de ce qu'elles produisent. Toutes s
 
 Chaque commande est donnée sous deux formes :
 - le raccourci **`make`**, pratique en local (utilise l'environnement virtuel `.venv/`) ;
-- la **commande brute équivalente**, à coller telle quelle dans un pipeline CI (`.github/workflows/ci.yml`) ou si `make` n'est pas installé — un runner CI installe directement dans son propre environnement isolé, donc pas besoin de `.venv/bin/...`.
+- la **commande brute équivalente**, à coller telle quelle dans un pipeline CI (`.github/workflows/ci.yml`) ou si `make` n'est pas installé (un runner CI installe directement dans son propre environnement isolé, donc pas besoin de `.venv/bin/...`).
 
 ## En local (sans Docker)
 
@@ -21,7 +21,7 @@ Crée l'environnement virtuel Python (`.venv/`) et installe Flask, pytest, gunic
 ```bash
 pip install -r requirements-dev.txt
 ```
-En CI, si le job ne fait que lancer les tests (pas de lint), `pip install -r requirements.txt` suffit — `requirements-dev.txt` n'est utile que pour `ruff`/`mypy`.
+En CI, si le job ne fait que lancer les tests (pas de lint), `pip install -r requirements.txt` suffit ; `requirements-dev.txt` n'est utile que pour `ruff`/`mypy`.
 
 ### `make test`
 
@@ -53,7 +53,7 @@ pytest --junitxml=report.xml
 ```bash
 make lint
 ```
-Analyse le code avec **Ruff** (style, imports non triés, syntaxe obsolète — config dans `pyproject.toml`).
+Analyse le code avec **Ruff** (style, imports non triés, syntaxe obsolète ; config dans `pyproject.toml`).
 
 **Résultat** :
 ```
@@ -88,7 +88,7 @@ mypy app wsgi.py
 ```bash
 make quality
 ```
-Enchaîne `make lint` puis `make typecheck` — pratique pour tout vérifier d'un coup avant de pousser.
+Enchaîne `make lint` puis `make typecheck`, pratique pour tout vérifier d'un coup avant de pousser.
 
 **Commande brute (CI)** :
 ```bash
@@ -146,7 +146,7 @@ make down
 ```
 Arrête et supprime les conteneurs `api` et `db` (le réseau aussi).
 
-**Résultat** : conteneurs supprimés, mais le volume `db-data` est conservé — les données MySQL survivent.
+**Résultat** : conteneurs supprimés, mais le volume `db-data` est conservé ; les données MySQL survivent.
 
 **Commande brute (CI)** :
 ```bash
@@ -173,7 +173,7 @@ docker compose build
 docker compose down -v
 ```
 
-**Résultat** : supprime aussi le volume `db-data` — toutes les tâches enregistrées disparaissent. Le prochain `make up` (ou `docker compose up -d --build`) repart d'une base vide.
+**Résultat** : supprime aussi le volume `db-data` ; toutes les tâches enregistrées disparaissent. Le prochain `make up` (ou `docker compose up -d --build`) repart d'une base vide.
 
 ## Nettoyage
 
@@ -239,7 +239,7 @@ curl -X DELETE http://localhost:5001/tasks/1
 
 ## Utiliser l'interface web (navigateur)
 
-L'application n'est pas qu'une API : la page d'accueil est un vrai template HTML (`app/templates/index.html`) qui appelle les mêmes routes en interne via des formulaires.
+L'application n'est pas qu'une API : la page d'accueil est un vrai template HTML (`app/templates/index.html`) avec ses propres formulaires (`/web/tasks/...`), séparés des routes JSON mais agissant sur les mêmes tâches en base.
 
 Ouvrir http://localhost:5001/ (ou http://127.0.0.1:5001/ en local) :
 
