@@ -45,3 +45,69 @@ def test_home_page_shows_created_tasks():
 
     assert response.status_code == 200
     assert b"Acheter du pain" in response.data
+
+
+def test_delete_task_removes_it():
+    client = make_client()
+    created = client.post("/tasks", json={"title": "Acheter du pain"}).get_json()
+
+    response = client.delete(f"/tasks/{created['id']}")
+
+    assert response.status_code == 204
+    assert client.get("/tasks").get_json() == []
+
+
+def test_delete_missing_task_returns_404():
+    client = make_client()
+
+    response = client.delete("/tasks/999")
+
+    assert response.status_code == 404
+
+
+def test_update_task_can_mark_it_done():
+    client = make_client()
+    created = client.post("/tasks", json={"title": "Acheter du pain"}).get_json()
+
+    response = client.patch(f"/tasks/{created['id']}", json={"done": True})
+
+    assert response.status_code == 200
+    assert response.get_json()["done"] is True
+    assert client.get("/tasks").get_json()[0]["done"] is True
+
+
+def test_update_missing_task_returns_404():
+    client = make_client()
+
+    response = client.patch("/tasks/999", json={"done": True})
+
+    assert response.status_code == 404
+
+
+def test_web_form_adds_a_task_and_redirects_home():
+    client = make_client()
+
+    response = client.post("/web/tasks", data={"title": "Acheter du pain"})
+
+    assert response.status_code == 302
+    assert b"Acheter du pain" in client.get("/").data
+
+
+def test_web_form_deletes_a_task_and_redirects_home():
+    client = make_client()
+    created = client.post("/tasks", json={"title": "Acheter du pain"}).get_json()
+
+    response = client.post(f"/web/tasks/{created['id']}/delete")
+
+    assert response.status_code == 302
+    assert client.get("/tasks").get_json() == []
+
+
+def test_web_form_toggles_a_task_and_redirects_home():
+    client = make_client()
+    created = client.post("/tasks", json={"title": "Acheter du pain"}).get_json()
+
+    response = client.post(f"/web/tasks/{created['id']}/toggle")
+
+    assert response.status_code == 302
+    assert client.get("/tasks").get_json()[0]["done"] is True

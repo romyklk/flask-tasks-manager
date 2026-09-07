@@ -1,10 +1,14 @@
 # Gestionnaire de tâches — API Flask
 
-Petite API REST développée avec **Flask**, pour le TP7 (Capstone Sujet 1). Elle expose :
+Petite API REST développée avec **Flask**. Elle expose :
 
 - `GET /tasks` — liste toutes les tâches (JSON)
 - `POST /tasks` — ajoute une tâche (`{"title": "..."}`)
-- `GET /` — page d'accueil HTML qui affiche la liste des tâches
+- `PATCH /tasks/<id>` — modifie une tâche (`{"title": "..."}` et/ou `{"done": true}`)
+- `DELETE /tasks/<id>` — supprime une tâche
+- `GET /` — page d'accueil HTML : ajouter/cocher/supprimer une tâche depuis le navigateur
+
+Détail de chaque commande et de son résultat attendu : voir [COMMANDES.md](COMMANDES.md).
 
 Les tâches sont stockées dans une base **MySQL** (persistante entre les redémarrages) quand l'app tourne via Docker. En local sans Docker (`make run` / `make test`), en l'absence de la variable `DATABASE_URL`, l'app utilise une base **SQLite en mémoire** — pratique pour développer/tester sans dépendre d'un serveur MySQL, mais tout est perdu à l'arrêt.
 
@@ -78,11 +82,11 @@ make docker-build
 
 Identifiants définis dans `compose.yml` (à usage local/dev uniquement) :
 
-| Variable            | Valeur     |
-| ------------------- | ---------- |
-| `MYSQL_DATABASE`    | `tasks`    |
-| `MYSQL_USER`        | `taskuser` |
-| `MYSQL_PASSWORD`    | `taskpass` |
+| Variable              | Valeur     |
+| --------------------- | ---------- |
+| `MYSQL_DATABASE`      | `tasks`    |
+| `MYSQL_USER`          | `taskuser` |
+| `MYSQL_PASSWORD`      | `taskpass` |
 | `MYSQL_ROOT_PASSWORD` | `rootpass` |
 
 Les données sont conservées dans le volume Docker `db-data` : elles survivent à un `docker compose restart` ou `down` (sans `-v`). Pour repartir d'une base vide :
@@ -101,12 +105,4 @@ make clean
 
 ## Exemples d'appels
 
-```bash
-# Lister les tâches
-curl http://localhost:5001/tasks
-
-# Ajouter une tâche
-curl -X POST http://localhost:5001/tasks \
-  -H "Content-Type: application/json" \
-  -d '{"title": "Acheter du pain"}'
-```
+Voir [COMMANDES.md](COMMANDES.md) pour la liste complète (GET/POST/PATCH/DELETE + interface web).

@@ -2,16 +2,110 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Gestionnaire de tâches</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #f5f6fa;
+      --card: #ffffff;
+      --text: #1f2430;
+      --muted: #8a8f9c;
+      --accent: #4f6df5;
+      --danger: #e0554f;
+      --border: #e3e5ea;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 3rem 1rem;
+    }
+    main {
+      width: 100%;
+      max-width: 480px;
+    }
+    h1 {
+      font-size: 1.5rem;
+      margin: 0 0 1.5rem;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+    }
+    form.add-task {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.25rem;
+    }
+    form.add-task input[type="text"] {
+      flex: 1;
+      padding: 0.6rem 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.95rem;
+      background: var(--card);
+      color: var(--text);
+    }
+    button {
+      cursor: pointer;
+      border: none;
+      border-radius: 8px;
+      padding: 0.6rem 0.9rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+    .btn-primary { background: var(--accent); color: white; }
+    .btn-danger { background: transparent; color: var(--danger); padding: 0.3rem 0.5rem; }
+    .btn-ghost { background: transparent; color: var(--muted); padding: 0.3rem 0.5rem; font-size: 1rem; }
+    ul { list-style: none; margin: 0; padding: 0; }
+    li {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.6rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+    li:last-child { border-bottom: none; }
+    li form { margin: 0; display: contents; }
+    .title { flex: 1; word-break: break-word; }
+    .title.done { text-decoration: line-through; color: var(--muted); }
+    .empty { color: var(--muted); padding: 0.5rem 0; }
+  </style>
 </head>
 <body>
-  <h1>Gestionnaire de tâches</h1>
-  <ul>
-    {% for task in tasks %}
-      <li>{{ task.title }}</li>
-    {% else %}
-      <li>Aucune tâche pour l'instant.</li>
-    {% endfor %}
-  </ul>
+  <main>
+    <h1>Gestionnaire de tâches</h1>
+    <div class="card">
+      <form class="add-task" method="post" action="{{ url_for('web_create_task') }}">
+        <input type="text" name="title" placeholder="Nouvelle tâche…" required autofocus>
+        <button type="submit" class="btn-primary">Ajouter</button>
+      </form>
+      <ul>
+        {% for task in tasks %}
+          <li>
+            <form method="post" action="{{ url_for('web_toggle_task', task_id=task.id) }}">
+              <button type="submit" class="btn-ghost" title="Marquer comme {{ 'à faire' if task.done else 'fait' }}">{{ "☑" if task.done else "☐" }}</button>
+            </form>
+            <span class="title{{ ' done' if task.done }}">{{ task.title }}</span>
+            <form method="post" action="{{ url_for('web_delete_task', task_id=task.id) }}">
+              <button type="submit" class="btn-danger" title="Supprimer">✕</button>
+            </form>
+          </li>
+        {% else %}
+          <li class="empty">Aucune tâche pour l'instant.</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </main>
 </body>
 </html>

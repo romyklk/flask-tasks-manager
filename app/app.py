@@ -1,6 +1,6 @@
 import os
 
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, jsonify, redirect, render_template, request, url_for
 
 from app.models import Task, db
 
@@ -32,5 +32,51 @@ def create_app(config=None):
         db.session.add(task)
         db.session.commit()
         return jsonify(task.to_dict()), 201
+
+    @app.patch("/tasks/<int:task_id>")
+    def update_task(task_id):
+        task = db.session.get(Task, task_id)
+        if task is None:
+            return jsonify({"error": "Tâche introuvable"}), 404
+        data = request.get_json()
+        if "title" in data:
+            task.title = data["title"]
+        if "done" in data:
+            task.done = data["done"]
+        db.session.commit()
+        return jsonify(task.to_dict())
+
+    @app.delete("/tasks/<int:task_id>")
+    def delete_task(task_id):
+        task = db.session.get(Task, task_id)
+        if task is None:
+            return jsonify({"error": "Tâche introuvable"}), 404
+        db.session.delete(task)
+        db.session.commit()
+        return "", 204
+
+    @app.post("/web/tasks")
+    def web_create_task():
+        title = request.form.get("title", "").strip()
+        if title:
+            db.session.add(Task(title=title))
+            db.session.commit()
+        return redirect(url_for("home"))
+
+    @app.post("/web/tasks/<int:task_id>/toggle")
+    def web_toggle_task(task_id):
+        task = db.session.get(Task, task_id)
+        if task is not None:
+            task.done = not task.done
+            db.session.commit()
+        return redirect(url_for("home"))
+
+    @app.post("/web/tasks/<int:task_id>/delete")
+    def web_delete_task(task_id):
+        task = db.session.get(Task, task_id)
+        if task is not None:
+            db.session.delete(task)
+            db.session.commit()
+        return redirect(url_for("home"))
 
     return app
